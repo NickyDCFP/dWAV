@@ -6,7 +6,7 @@
  *        human-readable portions of a .wav file. Additionally, it can make alterations like
  *        sample rate changes and data reversal, writing the modified data to another file.
  * 
- * @version 1.0
+ * @version 1.1
  * @date July 21, 2022
  * 
  */
@@ -43,7 +43,6 @@ void printFile(struct wav* pSoundFile, int extraParamsSize, int numExtraSubChunk
                struct data extraChunks[]);
 void changeSampleRate(struct wav* pSoundFile, int newSampleRate);
 void reverseFile(struct wav* pSoundFile);
-void reverseBlock(struct wav* pSoundFile, int reverseLength, int seekArm);
 void writeOutputFile(char* outputfilename, struct wav* pSoundFile, struct extraParams parameters, 
                      int extraParamsSize, int numExtraSubChunks, struct data extraChunks[]);
 void changeSpeed(struct wav* pSoundFile, int speedMultiple);
@@ -335,44 +334,26 @@ void changeSampleRate(struct wav* pSoundFile, int newSampleRate) {
 }
 
 /**
- * @brief Reverses the sound data in the passed .wav file without swapping the channels. That is, 
- *        reverses the samples in each individual channel.
+ * @brief Reverses the sound data in the passed wav struct
  * 
  * @param pSoundFile the pointer to the wav struct whose data is to be reversed
  */
 void reverseFile(struct wav* pSoundFile) {
-   int seekArm = 0;
-   int reverseLength = pSoundFile->dataElements.subChunk2Size / 
-                       pSoundFile->formatElements.numChannels;
-
-   //Isolates channels and passes them to the helper for reversal
-   for(int i = 0; i < pSoundFile->formatElements.numChannels; ++i) {
-      reverseBlock(pSoundFile, reverseLength, seekArm);
-      seekArm += reverseLength;
-   }
-}
-
-/**
- * @brief Reverses one channel in a wav struct
- * 
- * @param pSoundFile the pointer to the wav struct to be altered
- * @param reverseLength the byte length of the channel to be altered
- * @param seekArm the number of bytes into the data that the channel begins
- */
-void reverseBlock(struct wav* pSoundFile, int reverseLength, int seekArm) {
+   int length = pSoundFile->dataElements.subChunk2Size;
    int blockSize = pSoundFile->formatElements.blockAlign;
+
    unsigned char* temp = (unsigned char*)malloc(pSoundFile->formatElements.blockAlign);
    if(!temp) {
       printf("Error reversing the file.");
       exit(1);
    }
    //Gathers the sample blocks and reverses them individually
-   for(int i = seekArm; i < (reverseLength / 2) + seekArm; i+= blockSize) {
+   for(int i = 0; i < length / 2; i+= blockSize) {
       for(int j = 0; j < blockSize; j++) {
          temp[j] = pSoundFile->dataElements.subChunkData[i + j];
          pSoundFile->dataElements.subChunkData[i + j] = 
-            pSoundFile->dataElements.subChunkData[seekArm + reverseLength - i + j];
-         pSoundFile->dataElements.subChunkData[seekArm + reverseLength - i + j] = temp[j];
+            pSoundFile->dataElements.subChunkData[length - i + j];
+         pSoundFile->dataElements.subChunkData[length - i + j] = temp[j];
       }
    }
    free(temp);
