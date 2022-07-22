@@ -18,8 +18,8 @@
 #include <fcntl.h>
 #define SUBCHUNKIDSIZE 4 //Size of the data subchunk's ID and Size fields
 #define FMTSUBCHUNKSIZENOPARAMS 16 //Size of the Format subchunk without any extra parameters
-#define DEFAULTINPUTFILENAME "YoshiStoryTheme.wav"
-#define DEFAULTOUTPUTFILENAME "ProductFile.wav"
+#define DEFAULTINPUTFILENAME "input.wav"
+#define DEFAULTOUTPUTFILENAME "output.wav"
 #define VALIDEXTENSION ".wav"
 #define MAXEXTRASUBCHUNKS 10 //Number of "extra" subchunks (not riff, fmt, data) dWAV can process
 #define NUMVALIDFLAGS 5 
